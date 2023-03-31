@@ -18,6 +18,32 @@ let userId = computed(() => route.params.userId);
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString();
 };
+
+async function fetchUser() {
+  loading.value = true;
+  error.value = false;
+
+  try {
+    const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+      method: "GET",
+      headers: { "Accept": 'application/json' }
+    });
+
+    if (!response.ok) {
+      error.value = true;
+    } else {
+      const fetchedUser = await response.json();
+      user.value = fetchedUser;
+    }
+  } catch (e) {
+    error.value = true;
+  } finally {
+    loading.value = false;
+  }
+}
+
+fetchUser();
+
 </script>
 
 <template>
@@ -26,32 +52,36 @@ const formatDate = (date) => {
       Utilisateur charly
       <span class="badge rounded-pill bg-primary" data-test-admin>Admin</span>
     </h1>
-    <div class="text-center" data-test-loading>
+    <div v-if="loading" class="text-center" data-test-loading>
       <span class="spinner-border"></span>
       <span>Chargement en cours...</span>
     </div>
-    <div class="alert alert-danger mt-3" data-test-error>
+    <div v-if="error!=null" class="alert alert-danger mt-3" data-test-error>
       Une erreur est survenue
     </div>
-    <div data-test-view>
+    <div v-if="user!=null" data-test-view>
       <div class="row">
         <div class="col-lg-6">
           <h2>Produits</h2>
           <div class="row">
             <div
               class="col-md-6 mb-6 py-2"
-              v-for="i in 10"
-              :key="i"
+              v-for="product in user.products"
+              :key="product.id"
               data-test-product
             >
               <div class="card">
                 <RouterLink
-                  :to="{ name: 'Product', params: { productId: 'TODO' } }"
+                  :to="{
+                    name: 'Product',
+                    params: { productId: product.id }
+                  }"
+                  data-test-product-name
                 >
                   <img
-                    src="https://image.noelshack.com/fichiers/2023/12/4/1679526253-65535-51925549650-96f088a093-b-512-512-nofilter.jpg"
-                    class="card-img-top"
+                    :src=product.pictureUrl
                     data-test-product-picture
+                    class="card-img-top"
                   />
                 </RouterLink>
                 <div class="card-body">
@@ -59,20 +89,18 @@ const formatDate = (date) => {
                     <RouterLink
                       :to="{
                         name: 'Product',
-                        params: { productId: 'TODO' },
+                        params: { productId: product.id },
                       }"
                       data-test-product-name
                     >
-                      Chapeau en poil de chameau
+                      {{ product.name }}
                     </RouterLink>
                   </h5>
                   <p class="card-text" data-test-product-description>
-                    Ce chapeau en poil de chameau est un véritable chef-d'œuvre
-                    artisanal, doux au toucher et résistant pour une durabilité
-                    à long terme.
+                    {{ product.description }}
                   </p>
                   <p class="card-text" data-test-product-price>
-                    Prix de départ : 23 €
+                    Prix de départ : {{ product.originalPrice }}
                   </p>
                 </div>
               </div>
@@ -90,12 +118,12 @@ const formatDate = (date) => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="i in 10" :key="i" data-test-bid>
+              <tr v-for="bid in user.bids" :key="bid.id" data-test-bid>
                 <td>
                   <RouterLink
                     :to="{
                       name: 'Product',
-                      params: { productId: 'TODO' },
+                      params: { productId: product.id },
                     }"
                     data-test-bid-product
                   >
