@@ -4,11 +4,30 @@ import { ref, computed } from "vue";
 const loading = ref(false);
 const error = ref(false);
 
+const products = ref([]);
+
+const filteredProducts = computed(() => {
+  return products.value
+})
+
 async function fetchProducts() {
   loading.value = true;
   error.value = false;
 
   try {
+
+    const response = await fetch("http://localhost:3000/api/products", {
+      method: "GET",
+      headers: { "Accept": 'application/json' }
+    });
+
+
+    if (!response.ok) {
+      error.value = true;
+    } else {
+      const fetchedProducts = await response.json();
+      products.value = fetchedProducts;
+    }
   } catch (e) {
     error.value = true;
   } finally {
@@ -72,11 +91,11 @@ fetchProducts();
       Une erreur est survenue lors du chargement des produits.
     </div>
     <div class="row">
-      <div class="col-md-4 mb-4" v-for="i in 10" data-test-product :key="i">
+      <div class="col-md-4 mb-4" v-for="product in filteredProducts" data-test-product :key="product.id">
         <div class="card">
-          <RouterLink :to="{ name: 'Product', params: { productId: 'TODO' } }">
+          <RouterLink :to="{ name: 'Product', params: { productId: product.id } }">
             <img
-              src="https://picsum.photos/id/403/512/512"
+              :src=product.pictureUrl
               data-test-product-picture
               class="card-img-top"
             />
@@ -85,7 +104,7 @@ fetchProducts();
             <h5 class="card-title">
               <RouterLink
                 data-test-product-name
-                :to="{ name: 'Product', params: { productId: 'TODO' } }"
+                :to="{ name: 'Product', params: { productId: product.id } }"
               >
                 Machine à écrire
               </RouterLink>
