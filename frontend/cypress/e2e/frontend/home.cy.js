@@ -28,7 +28,7 @@ describe("Page /", () => {
 
           cy.get("[data-test-product]").should("have.length", 18);
 
-          cy.get(`[data-test-product-name]:contains("${name}")`)
+          cycy.get(`[data-test-product-name]:contains("${product.name}")`)
             .should("exist")
             .first()
             .closest("[data-test-product]")
@@ -74,7 +74,7 @@ describe("Page /", () => {
 
       cy.get("[data-test-product]").should("have.length", 18);
 
-      cy.get(`[data-test-product-name]:contains("${name}")`)
+      cy.get(`[data-test-product-name]:contains("${product.name}")`)
         .should("exist")
         .first()
         .closest("[data-test-product]")

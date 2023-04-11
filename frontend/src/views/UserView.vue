@@ -13,7 +13,7 @@ const user = ref(null);
 const loading = ref(false);
 const error = ref(null);
 
-let userId = computed(() => route.params.userId);
+let userId = computed(() => isAuthenticated.value ? userData.value.id : route.params.userId);
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString();
@@ -24,7 +24,7 @@ async function fetchUser() {
   error.value = false;
 
   try {
-    const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+    const response = await fetch(`http://localhost:3000/api/users/${userId.value}`, {
       method: "GET",
       headers: { "Accept": 'application/json' }
     });
@@ -56,7 +56,7 @@ fetchUser();
       <span class="spinner-border"></span>
       <span>Chargement en cours...</span>
     </div>
-    <div v-if="error!=null" class="alert alert-danger mt-3" data-test-error>
+    <div v-if="error" class="alert alert-danger mt-3" data-test-error>
       Une erreur est survenue
     </div>
     <div v-if="user!=null" data-test-view>
@@ -123,7 +123,7 @@ fetchUser();
                   <RouterLink
                     :to="{
                       name: 'Product',
-                      params: { productId: product.id },
+                      params: { productId: bid.product.id },
                     }"
                     data-test-bid-product
                   >

@@ -24,7 +24,9 @@ router.get('/api/users/:userId', async (req, res) => {
   if (user)
     res.status(200).json(user)
   else
-    res.status(404).json({ "error": "User not found" })
+    res.status(404).json({
+      "error": "User not found"
+    })
 })
 
 export default router

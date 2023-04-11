@@ -22,7 +22,7 @@ const { userData, isAuthenticated, logout, username } = useAuthStore();
           <li class="nav-item" v-if="isAuthenticated">
             <RouterLink
               class="nav-link"
-              :to="{ name: 'User', params: { userId: userData.id } }"
+              :to="{ name: 'User', params: { userId: 'me' } }"
             >
               Mon compte
             </RouterLink>

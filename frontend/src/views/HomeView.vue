@@ -81,15 +81,16 @@ fetchProducts();
       </div>
     </div>
 
-    <div class="text-center mt-4" data-test-loading>
+    <div v-if="loading" class="text-center mt-4" data-test-loading>
       <div class="spinner-border" role="status">
         <span class="visually-hidden">Chargement...</span>
       </div>
     </div>
 
-    <div class="alert alert-danger mt-4" role="alert" data-test-error>
+    <div v-if="error" class="alert alert-danger mt-4" role="alert" data-test-error>
       Une erreur est survenue lors du chargement des produits.
     </div>
+
     <div class="row">
       <div class="col-md-4 mb-4" v-for="product in filteredProducts" data-test-product :key="product.id">
         <div class="card">
