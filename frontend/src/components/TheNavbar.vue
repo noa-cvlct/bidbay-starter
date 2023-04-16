@@ -2,7 +2,7 @@
 import { RouterLink } from "vue-router";
 import { useAuthStore } from "../store/auth";
 
-const { userData, isAuthenticated, logout, username } = useAuthStore();
+const { isAuthenticated, logout, username } = useAuthStore();
 </script>
 
 <template>

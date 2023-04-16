@@ -90,9 +90,7 @@ router.put('/api/products/:productId', authMiddleware, async (req, res) => {
     return
   }
 
-  let user = await User.findByPk(req.user.id)
-
-  if (product.sellerId != req.user.id && !user.admin) {
+  if (product.sellerId != req.user.id && !req.user.admin) {
     res.status(403).json({
       'error': 'User not granted'
     })
@@ -101,11 +99,11 @@ router.put('/api/products/:productId', authMiddleware, async (req, res) => {
 
   try {
     let updatedProduct = await product.update({
-      name, 
-      description, 
-      pictureUrl, 
-      category, 
-      originalPrice, 
+      name,
+      description,
+      pictureUrl,
+      category,
+      originalPrice,
       endDate
     })
 
@@ -135,9 +133,7 @@ router.delete('/api/products/:productId', authMiddleware, async (req, res) => {
     return
   }
 
-  let user = await User.findByPk(req.user.id)
-
-  if (product.sellerId != req.user.id && !user.admin) {
+  if (product.sellerId != req.user.id && !req.user.admin) {
     res.status(403).json({
       'error': 'User not granted'
     })

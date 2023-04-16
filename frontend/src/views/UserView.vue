@@ -9,11 +9,15 @@ const { isAuthenticated, userData } = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
+if (!isAuthenticated.value && route.params.userId == 'me') {
+  router.push({ name: "Login" });
+}
+
 const user = ref(null);
 const loading = ref(false);
 const error = ref(null);
 
-let userId = computed(() => isAuthenticated.value ? userData.value.id : route.params.userId);
+let userId = computed(() => route.params.userId == 'me' ? userData.value.id : route.params.userId);
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString();
@@ -25,15 +29,17 @@ async function fetchUser() {
 
   try {
     const response = await fetch(`http://localhost:3000/api/users/${userId.value}`, {
-      method: "GET",
-      headers: { "Accept": 'application/json' }
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
     });
 
-    if (!response.ok) {
-      error.value = true;
-    } else {
+    if (response.ok) {
       const fetchedUser = await response.json();
       user.value = fetchedUser;
+    } else {
+      error.value = true;
     }
   } catch (e) {
     error.value = true;
@@ -47,10 +53,10 @@ fetchUser();
 </script>
 
 <template>
-  <div>
+  <div v-if="user != null">
     <h1 class="text-center" data-test-username>
-      Utilisateur charly
-      <span class="badge rounded-pill bg-primary" data-test-admin>Admin</span>
+      Utilisateur {{ user.username }}
+      <span v-if="user.admin" class="badge rounded-pill bg-primary" data-test-admin>Admin</span>
     </h1>
     <div v-if="loading" class="text-center" data-test-loading>
       <span class="spinner-border"></span>
@@ -59,7 +65,7 @@ fetchUser();
     <div v-if="error" class="alert alert-danger mt-3" data-test-error>
       Une erreur est survenue
     </div>
-    <div v-if="user!=null" data-test-view>
+    <div data-test-view>
       <div class="row">
         <div class="col-lg-6">
           <h2>Produits</h2>
@@ -80,6 +86,7 @@ fetchUser();
                 >
                   <img
                     :src=product.pictureUrl
+                    :alt=product.name
                     data-test-product-picture
                     class="card-img-top"
                   />
@@ -100,7 +107,7 @@ fetchUser();
                     {{ product.description }}
                   </p>
                   <p class="card-text" data-test-product-price>
-                    Prix de départ : {{ product.originalPrice }}
+                    Prix de départ : {{ product.originalPrice }} €
                   </p>
                 </div>
               </div>
@@ -127,11 +134,11 @@ fetchUser();
                     }"
                     data-test-bid-product
                   >
-                    Théière design
+                    {{ bid.product.name }}
                   </RouterLink>
                 </td>
-                <td data-test-bid-price>713 €</td>
-                <td data-test-bid-date>{{ formatDate(new Date()) }}</td>
+                <td data-test-bid-price>{{ bid.price }} €</td>
+                <td data-test-bid-date>{{ formatDate(bid.date) }}</td>
               </tr>
             </tbody>
           </table>

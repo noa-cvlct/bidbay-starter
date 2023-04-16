@@ -1,7 +1,7 @@
 <script setup>
 import { useAuthStore } from "../store/auth";
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const { isAuthenticated, token } = useAuthStore();
 const router = useRouter();
@@ -10,7 +10,60 @@ if (!isAuthenticated.value) {
   router.push({ name: "Login" });
 }
 
-// router.push({ name: "Product", params: { productId: 'TODO } });
+const error = ref(false);
+const loading = ref(false);
+
+const productName = ref("")
+const productDescription = ref("")
+const productCategory = ref("")
+const productOriginalPrice = ref("")
+const productPictureUrl = ref("")
+const productEndDate = ref("")
+
+let isFormValid = computed(() => {
+  return productName.value != ""
+    && productDescription.value != ""
+    && productCategory.value != ""
+    && productOriginalPrice.value != ""
+    && productPictureUrl.value != ""
+    && productEndDate.value != ""
+})
+
+async function addProduct() {
+  loading.value = true;
+  error.value = false;
+  try {
+    let response = await fetch('http://localhost:3000/api/products', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token.value}`,
+        'Content-Type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({
+        name: productName.value,
+        description: productDescription.value,
+        pictureUrl: productPictureUrl.value,
+        category: productCategory.value,
+        originalPrice: productOriginalPrice.value,
+        endDate: productEndDate.value
+      })
+    })
+
+    if (response.ok) {
+      const addedProduct = await response.json()
+      router.push({ name: 'Product', params: { productId: addedProduct.id } })
+    } else {
+      error.value = true
+    }
+
+  } catch (e) {
+    error.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
 </script>
 
 <template>
@@ -18,14 +71,14 @@ if (!isAuthenticated.value) {
 
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <form>
-        <div class="alert alert-danger mt-4" role="alert" data-test-error>
+      <form @submit.prevent="addProduct()">
+        <div v-if="error" class="alert alert-danger mt-4" role="alert" data-test-error>
           Une erreur s'est produite
         </div>
 
         <div class="mb-3">
           <label for="product-name" class="form-label"> Nom du produit </label>
-          <input
+          <input v-model="productName"
             type="text"
             class="form-control"
             id="product-name"
@@ -38,7 +91,7 @@ if (!isAuthenticated.value) {
           <label for="product-description" class="form-label">
             Description
           </label>
-          <textarea
+          <textarea v-model="productDescription"
             class="form-control"
             id="product-description"
             name="description"
@@ -50,7 +103,7 @@ if (!isAuthenticated.value) {
 
         <div class="mb-3">
           <label for="product-category" class="form-label"> Catégorie </label>
-          <input
+          <input v-model="productCategory"
             type="text"
             class="form-control"
             id="product-category"
@@ -64,7 +117,7 @@ if (!isAuthenticated.value) {
             Prix de départ
           </label>
           <div class="input-group">
-            <input
+            <input v-model="productOriginalPrice"
               type="number"
               class="form-control"
               id="product-original-price"
@@ -82,7 +135,7 @@ if (!isAuthenticated.value) {
           <label for="product-picture-url" class="form-label">
             URL de l'image
           </label>
-          <input
+          <input v-model="productPictureUrl"
             type="url"
             class="form-control"
             id="product-picture-url"
@@ -96,7 +149,7 @@ if (!isAuthenticated.value) {
           <label for="product-end-date" class="form-label">
             Date de fin de l'enchère
           </label>
-          <input
+          <input v-model="productEndDate"
             type="date"
             class="form-control"
             id="product-end-date"
@@ -110,11 +163,11 @@ if (!isAuthenticated.value) {
           <button
             type="submit"
             class="btn btn-primary"
-            disabled
+            :disabled="!isFormValid"
             data-test-submit
           >
             Ajouter le produit
-            <span
+            <span v-if="loading"
               data-test-spinner
               class="spinner-border spinner-border-sm"
               role="status"
