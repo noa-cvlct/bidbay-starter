@@ -6,7 +6,6 @@ import { getDetails } from '../validators/index.js'
 const router = express.Router()
 
 router.delete('/api/bids/:bidId', authMiddleware, async (req, res) => {
-
   const { bidId } = req.params;
 
   let bid = await Bid.findByPk(bidId);
@@ -31,7 +30,6 @@ router.delete('/api/bids/:bidId', authMiddleware, async (req, res) => {
 })
 
 router.post('/api/products/:productId/bids', authMiddleware, async (req, res) => {
-
   const { price } = req.body;
   const { productId } = req.params;
 
