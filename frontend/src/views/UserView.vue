@@ -23,6 +23,19 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString();
 };
 
+let userBids = computed(() => {
+  const highestBids = {};
+  user.value.bids.forEach((bid) => {
+    if (bid.product.id in highestBids) {
+      if (bid.price > highestBids[bid.product.id].price)
+        highestBids[bid.product.id] = bid;
+    } else
+      highestBids[bid.product.id] = bid;
+  });
+  return Object.values(highestBids);
+})
+
+
 async function fetchUser() {
   loading.value = true;
   error.value = false;
@@ -31,7 +44,7 @@ async function fetchUser() {
     const response = await fetch(`http://localhost:3000/api/users/${userId.value}`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json'
+        accept: 'application/json'
       }
     });
 
@@ -125,7 +138,7 @@ fetchUser();
               </tr>
             </thead>
             <tbody>
-              <tr v-for="bid in user.bids" :key="bid.id" data-test-bid>
+              <tr v-for="bid in userBids" :key="bid.id" data-test-bid>
                 <td>
                   <RouterLink
                     :to="{
